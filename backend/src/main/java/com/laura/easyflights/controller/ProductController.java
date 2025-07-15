@@ -7,23 +7,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import java.util.stream.Collectors;
-
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.laura.easyflights.service.ProductService;
 import com.laura.easyflights.model.Product;
+import com.laura.easyflights.model.Category;
+import com.laura.easyflights.model.Feature;
 import com.laura.easyflights.model.ProductImage;
+import com.laura.easyflights.repository.CategoryRepository;
+import com.laura.easyflights.repository.FeatureRepository;
 
 @RestController
 @RequestMapping("/api/products")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ProductController {
+
+    @Autowired
     private ProductService service;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private FeatureRepository featureRepository;
 
     public ProductController(ProductService service) {
         this.service = service;
@@ -51,7 +62,9 @@ public class ProductController {
     public ResponseEntity<Product> addProduct(
             @RequestParam("name") String name,
             @RequestParam("description") String description,
+            @RequestParam("categoryId") Long categoryId,
             @RequestParam("price") Integer price,
+            @RequestParam("features") List<Long> featuresId,
             @RequestParam("images") MultipartFile[] images) {
 
         Product product = new Product();
@@ -59,6 +72,17 @@ public class ProductController {
         product.setDescription(description);
         product.setPrice(price);
 
+        List<Feature> features = featureRepository.findAllById(featuresId);
+        product.setFeatures(features);
+
+        Optional<Category> category = categoryRepository.findById(categoryId);
+        if(category.isPresent()){
+            product.setCategory(category.get());
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+
+;
         List<ProductImage> imageList = new ArrayList<>();
 
         String assetsDir = "/Users/lauracamargo/Documents/ProyectoDG/backend/uploads";
