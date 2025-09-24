@@ -2,6 +2,8 @@ package com.laura.easyflights.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,6 +24,7 @@ public class Category {
     private String description;
 
     @OneToMany(mappedBy = "category")
+    @JsonIgnoreProperties({"category", "features", "lstReservationDate"})
     private List<Product> products;
 
     @OneToOne(mappedBy = "category", cascade = CascadeType.ALL)

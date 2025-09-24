@@ -3,6 +3,7 @@ package com.laura.easyflights.model;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
@@ -16,7 +17,7 @@ public class Product {
 
     private String name;
     private String description;
-    private Integer price;
+    private Double price;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
@@ -35,11 +36,21 @@ public class Product {
     )
     private List<Feature> features;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("product")
+    private List<ReservationDate> lstReservationDate = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<Review> reviews = new ArrayList<>();
+
+
+
+
     // Constructores (uno vacío para que JPA cree objetos de manera automática)
     public Product() {
     }
 
-    public Product(String name, String description, Integer price) {
+    public Product(String name, String description, Double price) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -47,8 +58,20 @@ public class Product {
 
     // Setters y Getters
 
+    public List<ReservationDate> getReservationDates(){
+        return lstReservationDate;
+    }
+
+    public void setReservationDate(List<ReservationDate> lstReservationDate){
+        this.lstReservationDate = lstReservationDate;
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -67,11 +90,11 @@ public class Product {
         this.description = description;
     }
 
-    public Integer getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -97,6 +120,10 @@ public class Product {
 
     public void setFeatures(List<Feature> features){
         this.features = features;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
     }
 
 }

@@ -28,7 +28,14 @@ public class CategoryService {
 
     // Método para eliminar categorías
     public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+        Category category = categoryRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+    
+        if (category.getProducts() != null && !category.getProducts().isEmpty()) {
+            throw new IllegalStateException("No se puede eliminar la categoría porque tiene productos asociados");
+        }
+    
+        categoryRepository.delete(category);
     }
 
     public boolean categoryTitleExists(String title) {

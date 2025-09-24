@@ -1,10 +1,16 @@
 package com.laura.easyflights.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -24,6 +30,14 @@ public class User {
 
     private boolean isAdmin = false;
 
+    @ManyToMany
+    @JoinTable(
+        name = "user_favorites",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private List<Product> favorites = new ArrayList<>();
+
     // Constructor vacío para JPA
     public User() {
     }
@@ -36,6 +50,13 @@ public class User {
         this.isAdmin = isAdmin;
     }
 
+    public List<Product> getFavorites(){
+        return favorites;
+    }
+
+    public void setFavorites(List<Product> favorites){
+        this.favorites = favorites;
+    }
 
     public Long getId() {
         return id;

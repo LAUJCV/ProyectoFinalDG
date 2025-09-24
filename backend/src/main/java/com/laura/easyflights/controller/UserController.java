@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.laura.easyflights.dto.LoginRequest;
+import com.laura.easyflights.model.Product;
 import com.laura.easyflights.model.User;
 import com.laura.easyflights.service.UserService;
 
@@ -104,4 +105,18 @@ public class UserController {
         userService.deleteUser(id);
     }
 
+    @GetMapping("/{id}/favorites")
+    public List<Product> getFavorites(@PathVariable Long id){
+        return userService.getFavorites(id);
+    }
+
+    @PostMapping("/{userId}/favorites/{productId}")
+    public void addFavorites(@PathVariable Long userId, @PathVariable Long productId){
+        userService.addFavorites(userId, productId);
+    }
+
+    @DeleteMapping("/{userId}/favorites/{productId}")
+    public void removeFavorites(@PathVariable Long userId, @PathVariable Long productId){
+        userService.removeFavorite(userId, productId);
+    }
 }

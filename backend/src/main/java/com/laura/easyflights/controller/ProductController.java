@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.laura.easyflights.service.ProductService;
 import com.laura.easyflights.model.Product;
+import com.laura.easyflights.dto.ProductDTO;
 import com.laura.easyflights.model.Category;
 import com.laura.easyflights.model.Feature;
 import com.laura.easyflights.model.ProductImage;
@@ -40,7 +41,6 @@ public class ProductController {
         this.service = service;
     }
 
-
     // Método REST para obtener todos los productos
     @GetMapping
     public List<Product> getAllProducts() {
@@ -63,7 +63,7 @@ public class ProductController {
             @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("price") Integer price,
+            @RequestParam("price") Double price,
             @RequestParam("features") List<Long> featuresId,
             @RequestParam("images") MultipartFile[] images) {
 
@@ -76,13 +76,13 @@ public class ProductController {
         product.setFeatures(features);
 
         Optional<Category> category = categoryRepository.findById(categoryId);
-        if(category.isPresent()){
+        if (category.isPresent()) {
             product.setCategory(category.get());
         } else {
             return ResponseEntity.badRequest().build();
         }
 
-;
+        ;
         List<ProductImage> imageList = new ArrayList<>();
 
         String assetsDir = "/Users/lauracamargo/Documents/ProyectoDG/backend/uploads";
@@ -118,6 +118,12 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
         service.deleteProduct(id);
+    }
+
+    @GetMapping("/with-ratings")
+    public ResponseEntity<List<ProductDTO>> getProductsWithRatings() {
+        List<ProductDTO> productsWithRatings = service.getAllProductsWithAverageRating();
+        return ResponseEntity.ok(productsWithRatings);
     }
 
 }
