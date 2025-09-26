@@ -1,25 +1,34 @@
 package com.laura.easyflights.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.laura.easyflights.dto.ProductDTO;
 import com.laura.easyflights.model.Product;
 import com.laura.easyflights.model.Review;
 import com.laura.easyflights.repository.ProductRepository;
+import com.laura.easyflights.repository.ReservationRepository;
+import com.laura.easyflights.repository.ReservationDateRepository;
 
 @Service
 public class ProductService {
     private final ProductRepository repository;
+    private final ReservationRepository reservationRepository;
+    private final ReservationDateRepository reservationDateRepository;
 
-    public ProductService(ProductRepository repository) {
+    public ProductService(ProductRepository repository,
+                          ReservationRepository reservationRepository,
+                          ReservationDateRepository reservationDateRepository) {
         this.repository = repository;
+        this.reservationRepository = reservationRepository;
+        this.reservationDateRepository = reservationDateRepository;
     }
 
     // Metodo para obtener todos los productos
@@ -65,6 +74,32 @@ public class ProductService {
                 averageRating
             );
         }).collect(Collectors.toList());
-     
+    }
+
+    // productos disponibles por rango de fechas
+    public List<Product> findAvailableProducts(LocalDate start, LocalDate end) {
+        if (start == null || end == null || end.isBefore(start)) {
+            throw new IllegalArgumentException("Rango de fechas inválido");
+        }
+
+        List<Product> all = repository.findAll();
+        List<Product> result = new ArrayList<>();
+
+        for (Product p : all) {
+            // Revisar solapamiento con reservas
+            boolean overlap = !reservationRepository
+                .findByProductIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                    p.getId(), end, start
+                ).isEmpty();
+            if (overlap) continue;
+
+            // Revisar si hay días bloqueados en ese rango
+            boolean blocked = reservationDateRepository
+                .existsByProductIdAndDateBetween(p.getId(), start, end);
+            if (blocked) continue;
+
+            result.add(p);
+        }
+        return result;
     }
 }

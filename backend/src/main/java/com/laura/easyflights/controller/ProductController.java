@@ -2,6 +2,7 @@ package com.laura.easyflights.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;  
 
 import com.laura.easyflights.service.ProductService;
 import com.laura.easyflights.model.Product;
@@ -25,7 +27,7 @@ import com.laura.easyflights.repository.FeatureRepository;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class ProductController {
 
     @Autowired
@@ -41,7 +43,7 @@ public class ProductController {
         this.service = service;
     }
 
-    // Método REST para obtener todos los productos
+    // ===== Listar todos (mantengo tu shuffle) =====
     @GetMapping
     public List<Product> getAllProducts() {
         List<Product> allProducts = service.getAllProducts();
@@ -49,16 +51,25 @@ public class ProductController {
         return allProducts;
     }
 
-    // Método para obtener producto por ID
+    // ===== Nuevo: productos disponibles por rango =====
+    @GetMapping("/available")
+    public ResponseEntity<List<Product>> available(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+    ){
+        List<Product> available = service.findAvailableProducts(start, end);
+        return ResponseEntity.ok(available);
+    }
+
+    // ===== Obtener por id =====
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
         Optional<Product> product = service.getProductById(id);
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Método POST para agregar un producto
+    // ===== Crear producto (multipart) =====
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-
     public ResponseEntity<Product> addProduct(
             @RequestParam("name") String name,
             @RequestParam("description") String description,
@@ -82,7 +93,6 @@ public class ProductController {
             return ResponseEntity.badRequest().build();
         }
 
-        ;
         List<ProductImage> imageList = new ArrayList<>();
 
         String assetsDir = "/Users/lauracamargo/Documents/ProyectoDG/backend/uploads";
@@ -96,7 +106,6 @@ public class ProductController {
             String path = assetsDir + "/" + fileName;
             try {
                 image.transferTo(new File(path));
-
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
@@ -110,20 +119,19 @@ public class ProductController {
         product.setImages(imageList);
 
         Product saved = service.addProduct(product);
-
         return ResponseEntity.ok(saved);
     }
 
-    // Método REST para eliminar un producto
+    // ===== Eliminar =====
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
         service.deleteProduct(id);
     }
 
+    // ===== Productos con rating promedio =====
     @GetMapping("/with-ratings")
     public ResponseEntity<List<ProductDTO>> getProductsWithRatings() {
         List<ProductDTO> productsWithRatings = service.getAllProductsWithAverageRating();
         return ResponseEntity.ok(productsWithRatings);
     }
-
 }

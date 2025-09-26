@@ -17,4 +17,10 @@ public interface ReservationDateRepository extends JpaRepository<ReservationDate
     boolean existsByProductAndUser(Product product, User user);
     List<ReservationDate> findByUserIdAndProductId(Long userId, Long productId);
     Optional<ReservationDate> findOptionalByUserIdAndProductId(Long userId, Long productId);
+     // ¿Hay días ocupados entre start y end (INCLUSIVO)?
+     boolean existsByProductIdAndDateBetween(Long productId, LocalDate start, LocalDate end);
+
+     // Traer los días ocupados para pintarlos/bloquearlos en el calendario
+     List<ReservationDate> findByProductIdAndDateBetween(Long productId, LocalDate start, LocalDate end);
+    
 }

@@ -53,7 +53,7 @@ public class ReservationDateService {
         }
 
         ReservationDate reservationDate = new ReservationDate();
-        reservationDate.setLocalDate(date);
+        reservationDate.setDate(date);
         reservationDate.setProduct(product);
         reservationDate.setUser(user);
 

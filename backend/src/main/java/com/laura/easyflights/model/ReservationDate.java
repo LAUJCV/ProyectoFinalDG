@@ -50,7 +50,7 @@ public class ReservationDate {
         return date;
     }
 
-    public void setLocalDate(LocalDate date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
